@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <!--extends表明此页面继承自base.html 文件-->
+    {% extends "base.html" %}
+    {% load staticfiles %}
+
+    <!--写入base.html 中定义的title-->
+    {% block title %}
+        首页
+    {% endblock title%}
+
+    <!--写入base.html 中定义的content-->
+    {% block content %}
+    <!--定义放置文章标题的div容器-->
+    <div class="container">
+        <div class="row mt-2">
+
+            {% for article in article %}
+                <!--文章内容-->
+                <div class="col-4 mb-4">
+                <!--卡片容器-->
+                    <div class="card h-100">
+                        <!--标题-->
+                        <h4 class="card-header">{{ article.title }}</h4>
+                        <!--摘要-->
+                        <div class="card-body">
+                            <!--slice Django过滤器语法，表示取出正文的前100字符，避免摘要太长-->
+                            <p class="card-text">{{ article.body|slice:'100' }}...</p>
+                        </div>
+                        <!--注脚-->
+                        <div class="card-footer">
+                            <a href="{% url 'article:article_detail' article.id %}" class="btn btn-primary">阅读本文</a>
+                        </div>
+                    </div>
+
+                </div>
+            {% endfor %}
+
+        </div>
+    </div>
+    {% endblock content %}
+</body>
+</html>

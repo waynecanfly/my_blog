@@ -1,0 +1,30 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!--网站主语言-->
+    <meta charset="UTF-8">
+    <!--预留网站标题的位置-->
+    <title>{% block title %}{% endblock %}</title>
+    <!--引入bootstrap的css文件-->
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+{#    这里引入了Pygment,是一种通用语法高亮显示器，可自动生成美化代码块的样式文件monokai.css#}
+    <!--引入monokai.css-->
+    <link rel="stylesheet" href="{% static 'md_css/monokai.css' %}">
+</head>
+<body>
+    <!--引入导航栏-->
+    {% include 'header.html' %}
+    <!--预留具体页面位置-->
+    {% block content %}{% endblock content %}
+    <!--引入注脚-->
+    {% include 'footer.html' %}
+    <!--bootstrap.js 依赖jquery.js和poper.js，因此在这里引入-->
+    <script src="{% static 'jquery/jquery-3.3.1.js' %}"></script>
+    <script src="{% static 'popper/popper-1.14.4.js' %}"></script>
+    <!--引入bootstrap的js文件-->
+    <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+    <!--引入layer弹窗组件的js文件-->
+    <script src="{% static 'layer/layer.js' %}"></script>
+</body>
+</html>
