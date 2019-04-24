@@ -6,7 +6,9 @@ from django.shortcuts import render
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponse
-from .forms import UserLoginForm, UserRegisterForm
+
+from userprofile.models import Profile
+from .forms import UserLoginForm, UserRegisterForm, ProfileForm
 
 
 # Create your views here.
@@ -73,3 +75,31 @@ def user_delete(request, id):
         return redirect("article:article_list")
     else:
         return HttpResponse("你没有删除操作的权限。")
+
+
+# 编辑用户信息
+@login_required(login_url='/userprofile/login/')
+def profile_edit(request, id):
+    user = User.objects.get(id=id)
+    # user_id 是onetoonefield自动生成的字段
+    profile = Profile.objects.get(user_id=id)
+
+    if request.method == 'POST':
+        if request.user != user:
+            return HttpResponse("你没有权限修改此用户信息")
+
+        profile_form = ProfileForm(data=request.POST)
+        if profile_form.is_valid():
+            profile_cd = profile_form.cleaned_data
+            profile.phone = profile_cd['phone']
+            profile.bio = profile_cd['bio']
+            profile.save()
+            return redirect("userprofile:edit",id=id)
+        else:
+            return HttpResponse("注册表单输入有误，请重新输入~")
+    elif request.method == 'GET':
+        profile_form = ProfileForm()
+        context = {'profile_form': profile_form,'profile':profile,'user':user}
+        return render(request,'userprofile/edit.html',context)
+    else:
+        return HttpResponse('请使用GET或POST请求数据')

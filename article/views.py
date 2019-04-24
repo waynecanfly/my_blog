@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -34,6 +35,7 @@ def article_detail(request, id):
 # 写文章的视图
 from article.form import ArticlePostForm
 from django.shortcuts import redirect
+@login_required(login_url='/userprofile/login/')
 def article_create(request):
     # 对请求的类型进行判断
     if request.method == 'POST':
@@ -44,7 +46,7 @@ def article_create(request):
             # 保存数据，暂时不提交数据库
             new_article = article_post_form.save(commit=False)
             # 指定数据库中id=1的用户为作者
-            new_article.author = User.objects.get(id=1)
+            new_article.author = User.objects.get(id=request.user.id)
             # 将新文章保存到数据库中
             new_article.save()
             # 完成后返回文章列表
@@ -61,11 +63,14 @@ def article_create(request):
         return render(request, 'article/create.html', context)
 
 # 删除文章
+@login_required(login_url='/userprofile/login/')
 def article_delete(request, id):
     article = ArticlePost.objects.get(id=id)
     article.delete()
     return redirect("article:article_list")
 
+# 更新文章
+@login_required(login_url='/userprofile/login/')
 def article_update(request, id):
     """
     更新文章的视图函数
