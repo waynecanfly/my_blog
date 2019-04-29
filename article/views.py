@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.shortcuts import render
 
@@ -9,7 +10,13 @@ from article.models import ArticlePost
 
 
 def article_list(request):
-    articles = ArticlePost.objects.all()
+    article_list = ArticlePost.objects.all()
+    print(type(article_list))
+    paginator = Paginator(article_list,1)
+    # 获取url中的页码
+    page = request.GET.get("page")
+    # 将导航对象的相应页码内容返回给articles
+    articles = paginator.get_page(page)
     content = {'article':articles}
     return render(request, 'article/list.html', content)
 

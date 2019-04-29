@@ -10,7 +10,7 @@ urlpatterns = [
     # 目前还没有urls
     path('article-list/', views.article_list, name='article_list'),
     # 文章详情
-    path('article-list/<int:id>/', views.article_detail, name='article_detail'),
+    path('article-detail/<int:id>/', views.article_detail, name='article_detail'),
     # 写文章
     path('article-create/', views.article_create, name='article_create'),
     # 删除文章
