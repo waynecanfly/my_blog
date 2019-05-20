@@ -16,7 +16,8 @@ class ArticlePost(models.Model):
     created = models.DateTimeField(default=timezone.now)
     # 文章更新时间。参数auto_now=True指定每次数据更新时自动写入当前的时间
     updated = models.DateTimeField(auto_now=True)
-
+    # 文章浏览量PositiveIntegerField用来存储正整数的字段，初始字段设为0
+    total_views = models.PositiveIntegerField(default=0)
     # 内部类 Meta用于给model定义元数据
     class Meta:
         # ording指定模型返回的数据的排列顺序

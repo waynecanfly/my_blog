@@ -10,15 +10,22 @@ from article.models import ArticlePost
 
 
 def article_list(request):
-    article_list = ArticlePost.objects.all()
-    print(type(article_list))
-    paginator = Paginator(article_list,1)
-    # 获取url中的页码
-    page = request.GET.get("page")
-    # 将导航对象的相应页码内容返回给articles
+    # 修改变量名称（articles -> article_list）
+    if request.GET.get('order') == 'total_views':
+        article_list = ArticlePost.objects.all().order_by('-total_views')
+        order = 'total_views'
+    else:
+        article_list = ArticlePost.objects.all()
+        order = 'normal'
+    # 每页显示 1 篇文章
+    paginator = Paginator(article_list, 1)
+    # 获取 url 中的页码
+    page = request.GET.get('page')
+    # 将导航对象相应的页码内容返回给 articles
     articles = paginator.get_page(page)
-    content = {'article':articles}
-    return render(request, 'article/list.html', content)
+
+    context = {'articles': articles,'order':order}
+    return render(request, 'article/list.html', context)
 
 # 文章详情
 # 实现了文章详情页面。为了让文章正文能够进行标题、加粗、引用、代码块等不同的排版（像在Office中那样！），这里使用Markdown语法。
@@ -26,6 +33,11 @@ def article_list(request):
 import markdown
 def article_detail(request, id):
     article = ArticlePost.objects.get(id=id)
+    # 浏览量+1
+    article.total_views += 1
+    update_fields = []
+    # 指定了数据库只更新total_views字段，优化执行效率。
+    article.save(update_fields=['total_views'])
     # 将markdown语法渲染成html样式
     article.body = markdown.markdown(article.body,
         extensions=[
@@ -86,7 +98,8 @@ def article_update(request, id):
     id：文章的id
     """
     article = ArticlePost.objects.get(id=id)
-
+    if request.user != article.author:
+        return HttpResponse('抱歉，你无权修改此文章')
     if request.method == "POST":
         # 将提交的数据赋值到表单实例中
         article_post_form = ArticlePostForm(data=request.POST)
