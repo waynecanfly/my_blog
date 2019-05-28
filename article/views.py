@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator
+from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import render
 
@@ -10,13 +11,31 @@ from article.models import ArticlePost
 
 
 def article_list(request):
-    # 修改变量名称（articles -> article_list）
-    if request.GET.get('order') == 'total_views':
-        article_list = ArticlePost.objects.all().order_by('-total_views')
-        order = 'total_views'
+    order = request.GET.get('order')
+    search = request.GET.get('search')
+    # 用户搜索逻辑
+    if search:
+        if order == 'total_views':
+            # 用Q对象进行联合搜索
+            article_list = ArticlePost.objects.filter(
+                # title字段查询，icontains是不区分大小写的包含，中间用两个下划线隔开。search是需要查询的文本
+                Q(title__icontains=search) |
+                Q(body__icontains=search)
+            ).order_by('-total_views')
+        else:
+            article_list = ArticlePost.objects.filter(
+                # title字段查询，icontains是不区分大小写的包含，中间用两个下划线隔开。search是需要查询的文本
+                Q(title__icontains=search) |
+                Q(body__icontains=search)
+            )
     else:
-        article_list = ArticlePost.objects.all()
-        order = 'normal'
+        # 将search参数置为空
+        search = ''
+        if order == 'total_views':
+            article_list = ArticlePost.objects.all().order_by('-total_views')
+        else:
+            article_list = ArticlePost.objects.all()
+
     # 每页显示 1 篇文章
     paginator = Paginator(article_list, 1)
     # 获取 url 中的页码
@@ -24,7 +43,7 @@ def article_list(request):
     # 将导航对象相应的页码内容返回给 articles
     articles = paginator.get_page(page)
 
-    context = {'articles': articles,'order':order}
+    context = {'articles': articles,'order':order,'search':search}
     return render(request, 'article/list.html', context)
 
 # 文章详情
